@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QORVEX Recibo · Control de recibo</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ============ INICIO: carpeta de trabajo ============ -->
+<section id="pantalla-inicio" class="pantalla centro-pantalla" hidden>
+  <div class="tarjeta">
+    <div class="marca"><span class="logo">Q</span><div><b>QORVEX RECIBO</b><small>CONTROL DE RECIBO · SIN SERVIDOR</small></div></div>
+    <p id="inicio-texto">Elige la carpeta de trabajo de este equipo. Ahí se guarda todo el historial.</p>
+    <button id="btn-reconectar" class="primario" hidden>Reconectar carpeta <span id="carpeta-nombre"></span></button>
+    <button id="btn-elegir" class="primario">Elegir carpeta de trabajo</button>
+    <p id="inicio-msg" class="msg"></p>
+  </div>
+</section>
+
+<!-- ============ PRIMERA CONFIGURACIÓN ============ -->
+<section id="pantalla-setup" class="pantalla centro-pantalla" hidden>
+  <form id="form-setup" class="tarjeta">
+    <div class="marca"><span class="logo">Q</span><div><b>PRIMERA CONFIGURACIÓN</b><small id="carpeta-actual"></small></div></div>
+    <p>Crea el administrador de este equipo. La clave de administrador sirve para recuperar contraseñas; guárdala en un lugar seguro.</p>
+    <label>Número de empleado<input name="empleado" required maxlength="20" autocomplete="off"></label>
+    <label>Nombre<input name="nombre" required></label>
+    <label>Contraseña (mínimo 10 caracteres)<input name="password" type="password" minlength="10" required autocomplete="new-password"></label>
+    <label>Clave de administrador para recuperar (mínimo 8)<input name="clave" type="password" minlength="8" required autocomplete="off"></label>
+    <button class="primario">Crear administrador</button>
+    <p class="msg" id="setup-msg"></p>
+  </form>
+</section>
+
+<!-- ============ ACCESO: inicio de sesión y registro (un panel a la vez) ============ -->
+<section id="pantalla-login" class="pantalla centro-pantalla" hidden>
+  <div class="acceso-caja">
+    <p class="ayuda" id="carpeta-actual-2"></p>
+    <div id="acceso-bloque" class="acceso-bloque">
+      <div class="acceso-visor">
+        <div class="acceso-pista" id="pista">
+          <form id="form-login" class="acceso-panel">
+            <h2>Iniciar sesión</h2>
+            <label>Número de empleado<input name="empleado" required maxlength="20" autocomplete="username"></label>
+            <label>Contraseña<input name="password" type="password" required autocomplete="current-password"></label>
+            <button class="primario">Entrar</button>
+            <button type="button" class="enlace" id="btn-recuperar-ver">¿Olvidaste tu contraseña?</button>
+            <p class="msg" id="login-msg"></p>
+          </form>
+          <form id="form-registro" class="acceso-panel">
+            <h2>Registrarse</h2>
+            <label>Número de empleado<input name="empleado" required maxlength="20" autocomplete="off"></label>
+            <label>Nombre<input name="nombre" required autocomplete="off"></label>
+            <label>Contraseña (mínimo 10)<input name="password" type="password" minlength="10" required autocomplete="new-password"></label>
+            <label>Repite la contraseña<input name="password2" type="password" minlength="10" required autocomplete="new-password"></label>
+            <button class="primario">Crear cuenta</button>
+            <p class="msg" id="registro-msg"></p>
+          </form>
+        </div>
+      </div>
+      <div class="deslizador">
+        <button type="button" class="enlace" id="btn-ir-login" data-pos="0">Iniciar sesión</button>
+        <input type="range" id="deslizador" min="0" max="100" step="1" value="0" aria-label="Deslizar entre iniciar sesión y registrarse">
+        <button type="button" class="enlace" id="btn-ir-registro" data-pos="100">Registrarse</button>
+      </div>
+    </div>
+    <form id="form-recuperar" class="tarjeta" hidden>
+      <div class="marca"><span class="logo">Q</span><div><b>RECUPERAR CONTRASEÑA</b><small>Requiere la clave de administrador</small></div></div>
+      <label>Número de empleado<input name="empleado" required maxlength="20"></label>
+      <label>Clave de administrador<input name="clave" type="password" required></label>
+      <label>Nueva contraseña (mínimo 10)<input name="nueva" type="password" minlength="10" required></label>
+      <button class="primario">Restablecer</button>
+      <button type="button" class="enlace" id="btn-recuperar-volver">Volver</button>
+      <p class="msg" id="recuperar-msg"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ============ APLICACIÓN ============ -->
+<section id="app" class="pantalla app" hidden>
+  <aside class="menu">
+    <div class="marca"><span class="logo">Q</span><div class="marca-texto"><b>RECIBO</b><small>CONTROL CENTER</small></div></div>
+    <nav>
+      <button class="nav activo" data-sec="piso"><span class="ico">🏭</span><span class="etiq">Piso</span></button>
+      <button class="nav" data-sec="captura"><span class="ico">✎</span><span class="etiq">Captura</span></button>
+      <button class="nav" data-sec="productividad"><span class="ico">📈</span><span class="etiq">Productividad</span></button>
+      <button class="nav" data-sec="cajas"><span class="ico">📦</span><span class="etiq">Detalle de caja</span></button>
+      <button class="nav" data-sec="reportes"><span class="ico">📊</span><span class="etiq">Reportes</span></button>
+      <button class="nav" data-sec="turno"><span class="ico">⏱</span><span class="etiq">Turno</span></button>
+      <button class="nav solo-admin" data-sec="config"><span class="ico">⚙</span><span class="etiq">Configuración</span></button>
+    </nav>
+    <div class="pie">
+      <b id="usuario-nombre"></b><small id="usuario-rol"></small><small id="carpeta-pie"></small>
+      <button id="btn-salir" class="enlace"><span class="ico">⎋</span><span class="etiq"> Cerrar sesión</span></button>
+    </div>
+  </aside>
+
+  <main class="contenido">
+    <header class="barra">
+      <div><small id="turno-actual"></small><h2 id="titulo-seccion">Piso</h2></div>
+      <div class="acciones">
+        <label id="encargado-caja" class="encargado-caja" hidden>Encargado
+          <select id="encargado-turno"></select>
+        </label>
+        <span id="modo-badge" class="badge"></span>
+        <button id="btn-actualizar" class="ghost">↻ Actualizar</button>
+      </div>
+    </header>
+
+    <div id="banner-lectura" class="banner" hidden>
+      <span>Otra sesión tiene la escritura de este equipo. Puedes consultar, pero no registrar.</span>
+      <button id="btn-tomar" class="ghost">Intentar tomar escritura</button>
+    </div>
+
+    <!-- PISO: KPIs, resumen, rampas arriba y bahías abajo -->
+    <section id="sec-piso" class="seccion">
+      <div class="filtros">
+        <label>Vista
+          <select id="kpi-filtro">
+            <option value="actual">Turno actual</option>
+            <option value="todo">Todo el historial</option>
+          </select>
+        </label>
+      </div>
+      <div class="kpis">
+        <article class="kpi"><span>CAJAS DESCARGADAS</span><strong id="k-descargadas">0</strong><small>Visitas con bahía asignada</small></article>
+        <article class="kpi"><span>CAJAS CARGADAS</span><strong id="k-cargadas">0</strong><small id="k-cargadas-detalle">0 racks · 0 retornable · 0 vacías</small></article>
+        <article class="kpi"><span>RECOLECTADAS</span><strong id="k-recolectadas">0</strong><small id="k-manuales">0 manuales</small></article>
+        <article class="kpi"><span>VALIDADAS</span><strong id="k-validadas">0</strong><small>Pasaron a etiquetado</small></article>
+        <article class="kpi"><span>PROCESADAS</span><strong id="k-procesadas">0</strong><small>Validadas y etiquetadas</small></article>
+        <article class="kpi"><span>UBICADAS</span><strong id="k-ubicadas">0</strong><small id="k-pallets">0 pallets</small></article>
+      </div>
+      <div class="grid2">
+        <article class="panel">
+          <h3>Semáforo de lotes abiertos</h3>
+          <div class="semaforo">
+            <div class="sem verde"><b id="s-verde">0</b><span>≤ 8 h · ÓPTIMO</span></div>
+            <div class="sem ambar"><b id="s-ambar">0</b><span>8–24 h · ALERTA</span></div>
+            <div class="sem rojo"><b id="s-rojo">0</b><span>&gt; 24 h · EMERGENCIA</span></div>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Productividad por turno</h3>
+          <div class="tabla-scroll"><table id="tabla-turnos"></table></div>
+        </article>
+      </div>
+      <div class="piso-bloque">
+        <h3>Rampas</h3>
+        <div class="piso-scroll"><div id="piso-rampas" class="rejilla"></div></div>
+      </div>
+      <div class="piso-bloque">
+        <h3>Bahías</h3>
+        <div class="piso-scroll"><div id="piso-bahias" class="rejilla"></div></div>
+        <p class="ayuda">Cada bahía muestra máximo 5 cajas, las de más tiempo primero. Las demás aparecen como "+N más" y están en Detalle de caja. Las posiciones 746A y 746B son bahías; no existen en rampas.</p>
+      </div>
+    </section>
+
+    <!-- CAPTURA: registro de caja en una bahía y registro con varias bahías -->
+    <section id="sec-captura" class="seccion" hidden>
+      <form id="form-captura-rapida" class="panel captura-rapida">
+        <h3>Registrar caja en bahía</h3>
+        <div class="cr-campos">
+          <label>Bahía<select name="bay" class="sel-bahias escribe" required></select></label>
+          <label>Caja / placa<input name="box_code" required class="escribe"></label>
+          <label>Pallets<input name="pallets" type="number" min="1" required class="escribe"></label>
+          <label>Unidad
+            <select name="unit" class="escribe">
+              <option value="CAJA">Caja</option>
+              <option value="PALLET">Pallet</option>
+            </select>
+          </label>
+          <label>Estatus<select name="stage" class="sel-etapas escribe"></select></label>
+          <label>Descarga (fecha y hora)<input name="cuando" type="datetime-local" class="escribe"></label>
+          <button class="primario escribe">Registrar</button>
+        </div>
+        <p class="ayuda" id="nota-captura"></p>
+      </form>
+      <form id="form-recoleccion" class="panel formulario-captura">
+        <h3>Varias bahías para una caja</h3>
+        <label>Tipo de movimiento
+          <select name="tipo" class="escribe">
+            <option value="recoleccion">Recolección</option>
+            <option value="manual">Caja omitida</option>
+          </select>
+        </label>
+        <p class="ayuda" id="captura-ayuda"></p>
+        <label>Caja / folio<input name="box_code" required></label>
+        <label>Área de origen<input name="origin_area" list="areas"></label>
+        <datalist id="areas"><option>Producción</option><option>Almacén</option><option>Rampa</option><option>Validación</option></datalist>
+        <label id="lbl-cuando">Fecha y hora del hecho (opcional)<input name="cuando" type="datetime-local"></label>
+        <div class="allocs-titulo">Bahías y pallets <button type="button" class="ghost mini addAlloc escribe">+ bahía</button></div>
+        <div class="allocs"></div>
+        <label>Observaciones<input name="notes"></label>
+        <button class="primario escribe">Registrar</button>
+        <p class="msg"></p>
+      </form>
+    </section>
+
+    <!-- PRODUCTIVIDAD: metas por turno, calendario y encargados -->
+    <section id="sec-productividad" class="seccion" hidden>
+      <div class="prod-filtros">
+        <label>Desde<input type="date" id="prod-desde"></label>
+        <label>Hasta<input type="date" id="prod-hasta"></label>
+        <label>Turno<select id="prod-turno"></select></label>
+        <label>Encargado<select id="prod-encargado"></select></label>
+        <div class="prod-atajos">
+          <button type="button" class="ghost mini" id="prod-hoy">Hoy</button>
+          <button type="button" class="ghost mini" id="prod-7">7 días</button>
+          <button type="button" class="ghost mini" id="prod-30">30 días</button>
+        </div>
+      </div>
+      <div class="prod-tarjetas">
+        <article class="panel" id="prod-en-curso"></article>
+        <article class="panel" id="prod-cumplimiento"></article>
+      </div>
+      <div class="kpis prod-kpis">
+        <article class="kpi"><span>CAJAS DESCARGADAS</span><strong id="pk-real">0</strong><small id="pk-meta">Meta 0</small></article>
+        <article class="kpi"><span>CAJAS CARGADAS</span><strong id="pk-cargadas">0</strong><small id="pk-cargadas-detalle">0 racks · 0 retornable · 0 vacías</small></article>
+        <article class="kpi"><span>PALLETS UBICADOS</span><strong id="pk-pallets">0</strong><small>En el periodo</small></article>
+      </div>
+      <div class="grid2">
+        <article class="panel">
+          <h3>Cajas por hora</h3>
+          <div id="prod-hora" class="barras-hora"></div>
+          <p class="ayuda">Raya negra: meta por hora del turno.</p>
+        </article>
+        <article class="panel">
+          <h3>Por turno · real / meta</h3>
+          <div id="prod-turnos"></div>
+          <h3 class="subtitulo">Por encargado</h3>
+          <div id="prod-encargados"></div>
+        </article>
+      </div>
+      <article class="panel">
+        <h3>Cajas por día</h3>
+        <div id="prod-dias" class="barras-dia"></div>
+        <p class="ayuda">Verde: cumple la meta · ámbar: debajo · gris rayado: no laboral (lo real se muestra, no suma meta).</p>
+      </article>
+    </section>
+
+    <!-- DETALLE DE CAJA: lista de cajas abiertas con buscador -->
+    <section id="sec-cajas" class="seccion" hidden>
+      <form id="form-cajas" class="panel buscador">
+        <input id="buscar-caja" placeholder="Folio o caja, ej. REM-105">
+        <button class="primario">Ver historial</button>
+      </form>
+      <article class="panel">
+        <h3>Cajas abiertas</h3>
+        <div class="tabla-scroll"><table id="tabla-abiertas"></table></div>
+      </article>
+      <div id="resultado-caja"></div>
+    </section>
+
+    <!-- REPORTES -->
+    <section id="sec-reportes" class="seccion" hidden>
+      <div class="filtros">
+        <label>Periodo
+          <select id="rep-filtro">
+            <option value="actual">Turno actual</option>
+            <option value="todo">Todo el historial</option>
+          </select>
+        </label>
+        <button id="btn-exp-eventos" class="ghost escribe">Exportar historial (CSV)</button>
+        <button id="btn-exp-kpi" class="ghost escribe">Exportar KPIs (CSV)</button>
+      </div>
+      <article class="panel">
+        <h3>KPIs por turno</h3>
+        <div class="tabla-scroll"><table id="tabla-rep"></table></div>
+        <p class="ayuda">Los archivos se guardan en la carpeta <b>exportes/</b> y también se descargan.</p>
+        <p class="msg" id="rep-msg"></p>
+      </article>
+    </section>
+
+    <!-- TURNO -->
+    <section id="sec-turno" class="seccion" hidden>
+      <article class="panel">
+        <h3>Turno</h3>
+        <div id="turno-info"></div>
+        <p class="ayuda">Al cerrar el turno se guarda una copia del historial en <b>respaldos/</b>.</p>
+        <button id="btn-cerrar-turno" class="primario escribe">Cerrar turno y respaldar</button>
+        <p class="msg" id="turno-msg"></p>
+      </article>
+    </section>
+
+    <!-- CONFIGURACIÓN -->
+    <section id="sec-config" class="seccion" hidden>
+      <div class="grid2">
+        <form id="form-config" class="panel">
+          <h3>Catálogos y turnos</h3>
+          <label>Rampas (separadas por coma)<textarea name="ramps" rows="2"></textarea></label>
+          <label>Bahías (separadas por coma)<textarea name="bays" rows="2"></textarea></label>
+          <label>Mínimo de caracteres para motivos<input name="min_reason_length" type="number" min="1"></label>
+          <p class="ayuda">Flujo de producto: <span id="flujo-txt"></span>. No se puede cambiar mientras haya historial.</p>
+          <button class="primario escribe">Guardar configuración</button>
+          <p class="msg"></p>
+        </form>
+        <div class="panel">
+          <h3>Usuarios</h3>
+          <div id="lista-usuarios-tabla"></div>
+          <form id="form-usuario">
+            <label>Número de empleado<input name="empleado" required maxlength="20"></label>
+            <label>Nombre<input name="nombre" required></label>
+            <label>Contraseña (mínimo 10)<input name="password" type="password" minlength="10" required></label>
+            <label>Perfil
+              <select name="role">
+                <option value="supervisor">supervisor</option>
+                <option value="capturista">capturista</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+            <button class="primario escribe">Agregar usuario</button>
+            <p class="msg"></p>
+          </form>
+        </div>
+      </div>
+      <div class="grid2">
+        <article class="panel">
+          <h3>Turnos y metas</h3>
+          <p class="ayuda">Un turno puede cruzar medianoche (ej. 22:30 a 07:00). La meta por hora es meta ÷ horas del turno.</p>
+          <div class="fila-turno encabezado"><span>Nombre</span><span>Inicio</span><span>Fin</span><span>Meta (cajas)</span><span>Meta/h</span><span></span></div>
+          <div id="turnos-editor"></div>
+          <div class="acciones-fila">
+            <button type="button" class="ghost" id="btn-add-turno">+ Turno</button>
+            <button type="button" class="primario escribe" id="btn-guardar-turnos">Guardar turnos y metas</button>
+          </div>
+          <p class="msg" id="turnos-msg"></p>
+        </article>
+        <article class="panel">
+          <h3>Calendario laboral</h3>
+          <p class="ayuda">Marca qué turnos se trabajan cada día. La meta solo suma en turnos marcados.</p>
+          <div id="calendario-tabla"></div>
+          <div class="acciones-fila">
+            <button type="button" class="primario escribe" id="btn-guardar-calendario">Guardar calendario</button>
+          </div>
+          <h3 class="subtitulo">Días festivos / no laborables</h3>
+          <form id="form-festivo" class="fila-festivo">
+            <label>Fecha<input type="date" name="fecha" required></label>
+            <label>Turnos<select name="turnos" id="festivo-turnos"></select></label>
+            <label>Nota<input name="nota" placeholder="Ej. 16 de septiembre"></label>
+            <button class="ghost escribe">+ Agregar</button>
+          </form>
+          <div id="lista-festivos"></div>
+          <p class="msg" id="calendario-msg"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+</section>
+
+<!-- Diálogo de motivo para saltos de flujo -->
+<dialog id="dlg-motivo">
+  <form method="dialog" id="form-motivo">
+    <h3 id="dlg-titulo">Motivo</h3>
+    <p id="dlg-ayuda" class="ayuda"></p>
+    <textarea id="dlg-texto" rows="3" required></textarea>
+    <menu>
+      <button value="cancel" formnovalidate class="ghost">Cancelar</button>
+      <button value="ok" class="primario">Confirmar salto</button>
+    </menu>
+  </form>
+</dialog>
+
+<button id="btn-tema" class="btn-tema" type="button">◐ Tema blanco</button>
+<div id="toasts" aria-live="polite"></div>
+
+<script src="motor.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

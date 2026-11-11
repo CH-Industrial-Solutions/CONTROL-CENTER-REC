@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "users": [
+    {
+      "empleado": "25164",
+      "name": "Carlos",
+      "role": "admin",
+      "active": true,
+      "failed": 0,
+      "locked_until": null,
+      "salt": "32FSk6oDzMMooOKAShJ9JA==",
+      "hash": "CMxd7PcKIJiH6uxNFEyBHvmeqxqHKvLGYCP8eT+w4Dc="
+    }
+  ],
+  "recovery": {
+    "salt": "HwxDWe48LY3nWVwLoQq3yg==",
+    "hash": "SWeLoPNDJYvJvkyrzew+/4VwsprXFKkFDvZWzKys41A="
+  }
+}

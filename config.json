@@ -1,0 +1,99 @@
+{
+  "schema": 1,
+  "ramps": [
+    "744",
+    "745",
+    "746",
+    "747",
+    "748",
+    "749",
+    "750",
+    "751",
+    "752",
+    "753",
+    "754",
+    "755"
+  ],
+  "bays": [
+    "744",
+    "745",
+    "746",
+    "746A",
+    "746B",
+    "747",
+    "748",
+    "749",
+    "750",
+    "751",
+    "752",
+    "753",
+    "754",
+    "755"
+  ],
+  "shifts": [
+    {
+      "meta": 0,
+      "name": "Día",
+      "start": "07:00",
+      "end": "15:00"
+    },
+    {
+      "meta": 0,
+      "name": "Tarde",
+      "start": "15:00",
+      "end": "22:30"
+    },
+    {
+      "meta": 0,
+      "name": "Noche",
+      "start": "22:30",
+      "end": "07:00"
+    }
+  ],
+  "work_days": [
+    [],
+    [
+      "Día",
+      "Tarde",
+      "Noche"
+    ],
+    [
+      "Día",
+      "Tarde",
+      "Noche"
+    ],
+    [
+      "Día",
+      "Tarde",
+      "Noche"
+    ],
+    [
+      "Día",
+      "Tarde",
+      "Noche"
+    ],
+    [
+      "Día",
+      "Tarde",
+      "Noche"
+    ],
+    [
+      "Día",
+      "Tarde"
+    ]
+  ],
+  "holidays": [],
+  "product_stages": [
+    "Por validar",
+    "Por etiquetar",
+    "Por ubicar",
+    "Ubicado parcial",
+    "Ubicado total"
+  ],
+  "min_reason_length": 5,
+  "stale_lock_minutes": 10,
+  "lockout": {
+    "attempts": 5,
+    "minutes": 10
+  }
+}
