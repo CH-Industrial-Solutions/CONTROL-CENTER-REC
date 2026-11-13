@@ -196,6 +196,39 @@
         <button class="primario escribe">Registrar</button>
         <p class="msg"></p>
       </form>
+
+      <!-- FACTURAS Y NOTAS: índice general compartido por todos los usuarios -->
+      <div class="grid2 facturas-bloque">
+        <section class="panel">
+          <h3>Facturas</h3>
+          <form id="form-factura" class="factura-agregar">
+            <input name="caja" class="escribe" placeholder="Factura o caja, luego Enter" autocomplete="off" required>
+            <button class="primario escribe">Agregar</button>
+          </form>
+          <input type="search" id="buscar-facturas" class="buscador" placeholder="Buscar factura, nota o usuario">
+          <p class="ayuda" id="facturas-cuenta"></p>
+          <div class="tabla-facturas-wrap">
+            <table class="tabla-facturas">
+              <thead><tr><th>Factura</th><th>Registró</th><th>Fecha</th><th></th></tr></thead>
+              <tbody id="tabla-facturas"></tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel">
+          <h3>Notas</h3>
+          <div class="fila-notas-top">
+            <input type="search" id="buscar-notas" class="buscador" placeholder="Buscar en notas">
+            <button type="button" class="ghost escribe" id="btn-limpiar-notas">Limpiar notas</button>
+          </div>
+          <p class="ayuda" id="notas-cuenta">Limpia el texto de las notas de las filas visibles; las facturas se conservan.</p>
+          <div class="tabla-facturas-wrap">
+            <table class="tabla-facturas">
+              <thead><tr><th>Factura</th><th>Nota</th></tr></thead>
+              <tbody id="tabla-notas"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
     </section>
 
     <!-- PRODUCTIVIDAD: metas por turno, calendario y encargados -->

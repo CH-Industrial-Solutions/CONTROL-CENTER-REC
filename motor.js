@@ -8,7 +8,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = '0.5.2';
+  const VERSION = '0.6.0';
   const FILES = Object.freeze({
     config: 'config.json',
     historial: 'historial.jsonl',
@@ -156,7 +156,7 @@
     return { events, truncated };
   }
 
-  function emptyState() { return { visits: {}, lots: {}, collections: {} }; }
+  function emptyState() { return { visits: {}, lots: {}, collections: {}, facturas: {} }; }
 
   function applyEvent(st, e, cfg) {
     switch (e.type) {
@@ -197,6 +197,18 @@
           capture_mode: e.data.capture_mode, reason: e.data.reason, occurrence_at: e.data.occurrence_at,
           bays: e.data.bays, created_at: e.at
         };
+        break;
+      case 'FACTURA_REGISTRADA':
+        st.facturas[e.entity.code] = {
+          code: e.entity.code, caja: e.data.caja, operator: e.operator || '', shift: e.shift || '',
+          shift_date: e.shift_date || '', at: e.at, nota: '', quitada: false
+        };
+        break;
+      case 'NOTA_ACTUALIZADA':
+        if (st.facturas[e.entity.code]) st.facturas[e.entity.code].nota = e.data.nota || '';
+        break;
+      case 'FACTURA_QUITADA':
+        if (st.facturas[e.entity.code]) st.facturas[e.entity.code].quitada = true;
         break;
       default: break; // CONFIG_CHANGED, SHIFT_CLOSED, etc. no alteran el estado de cajas.
     }
@@ -876,6 +888,56 @@
       return { pallets_remaining: plan.remaining };
     }
 
+    // ----- índice general de facturas: compartido por todos los usuarios -----
+    async function registrarFactura({ caja } = {}) {
+      requireWrite();
+      const f = str(caja).toUpperCase();
+      if (!f) fail('Escribe el número de factura o caja.');
+      if (f.length > 60) fail('La factura no puede pasar de 60 caracteres.');
+      const previas = Object.values(state.facturas).filter((x) => x.caja === f && !x.quitada);
+      const code = nextCode('FAC', Object.keys(state.facturas));
+      await commit([buildEvent(ctx(), 'FACTURA_REGISTRADA', 'FACTURA', code, { caja: f })]);
+      const previa = previas.length ? clone(previas[0]) : null;
+      return { code, caja: f, previa };
+    }
+
+    async function actualizarNota({ code, nota } = {}) {
+      requireWrite();
+      const fac = state.facturas[code];
+      if (!fac || fac.quitada) fail('La factura ya no está en el listado.');
+      const texto = str(nota);
+      if (texto.length > 300) fail('La nota no puede pasar de 300 caracteres.');
+      if (texto === fac.nota) return { code };
+      await commit([buildEvent(ctx(), 'NOTA_ACTUALIZADA', 'FACTURA', code, { nota: texto })]);
+      return { code };
+    }
+
+    // Borra solo el texto de las notas de las filas indicadas; las facturas se conservan.
+    async function limpiarNotas({ codes } = {}) {
+      requireWrite();
+      const lista = (Array.isArray(codes) ? codes : [])
+        .filter((k) => state.facturas[k] && !state.facturas[k].quitada && state.facturas[k].nota);
+      if (!lista.length) return { limpiadas: 0 };
+      await commit(lista.map((k) => buildEvent(ctx(), 'NOTA_ACTUALIZADA', 'FACTURA', k, { nota: '' })));
+      return { limpiadas: lista.length };
+    }
+
+    async function quitarFactura({ code } = {}) {
+      requireWrite();
+      if (!state.facturas[code] || state.facturas[code].quitada) fail('Factura no encontrada.');
+      await commit([buildEvent(ctx(), 'FACTURA_QUITADA', 'FACTURA', code, {})]);
+      return { code };
+    }
+
+    function listFacturas({ q = '' } = {}) {
+      const term = str(q).toUpperCase();
+      return Object.values(state.facturas)
+        .filter((x) => !x.quitada)
+        .filter((x) => !term || x.caja.includes(term) || x.nota.toUpperCase().includes(term) || x.operator.toUpperCase().includes(term))
+        .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+        .map(clone);
+    }
+
     // ----- recolecciones directas -----
     async function createCollection({ box_code, origin_area, capture_mode, reason, occurrence_at, allocations, notes, unit, stage, encargado } = {}) {
       requireWrite();
@@ -972,6 +1034,7 @@
       open, reload, hasUsers, listUsers, setupAdmin, register, login, logout, resetPassword, addUser,
       acquire, heartbeat, release, saveConfig,
       createVisit, pasarABahia, advanceVisit, createLot, advanceLot, createCollection, closeShift,
+      registrarFactura, actualizarNota, limpiarNotas, quitarFactura, listFacturas,
       kpis, exportEventsCsv, exportKpiCsv, snapshot,
       productividad: async (f = {}) => { await loadUsers(); return calcularProductividad(events, cfg, { from: f.from, to: f.to, turno: f.turno, encargado: f.encargado }, now()); },
       listSupervisores: async () => { await loadUsers(); return users.users.filter((u) => normalizeRole(u.role) === 'supervisor' && u.active !== false).map((u) => ({ empleado: u.empleado, name: u.name })); },

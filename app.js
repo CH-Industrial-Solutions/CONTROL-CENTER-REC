@@ -304,6 +304,82 @@
   q('#rep-filtro').onchange = () => refrescar();
 
   // ---------- refresco general ----------
+  // ---------- facturas y notas: índice general compartido ----------
+  const fechaCorta = (iso) => { try { return new Date(iso).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' }); } catch (_) { return ''; } };
+  const celda = (tr, texto, extra = {}) => {
+    const td = document.createElement('td');
+    td.textContent = texto;
+    if (extra.strong) td.style.fontWeight = '600';
+    tr.appendChild(td);
+    return td;
+  };
+  function renderFacturas() {
+    const tf = q('#tabla-facturas'), tn = q('#tabla-notas');
+    if (!tf || !S.engine || !S.session) return;
+    const todas = S.engine.listFacturas({});
+    const vistasF = S.engine.listFacturas({ q: q('#buscar-facturas').value });
+    const vistasN = S.engine.listFacturas({ q: q('#buscar-notas').value });
+    q('#facturas-cuenta').textContent = 'Mostrando ' + vistasF.length + ' de ' + todas.length + ' facturas registradas.';
+    q('#notas-cuenta').textContent = 'Limpia el texto de las notas de las filas visibles (' + vistasN.length + '); las facturas se conservan.';
+    tf.replaceChildren();
+    for (const f of vistasF) {
+      const tr = document.createElement('tr');
+      celda(tr, f.caja, { strong: true });
+      celda(tr, f.operator || '');
+      celda(tr, fechaCorta(f.at));
+      const td = document.createElement('td');
+      const x = document.createElement('button');
+      x.type = 'button'; x.className = 'ghost mini escribe'; x.textContent = 'X';
+      x.title = 'Quitar de la lista (queda en el historial)'; x.dataset.quitar = f.code;
+      td.appendChild(x); tr.appendChild(td);
+      tf.appendChild(tr);
+    }
+    tn.replaceChildren();
+    for (const f of vistasN) {
+      const tr = document.createElement('tr');
+      celda(tr, f.caja, { strong: true });
+      const td = document.createElement('td');
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.maxLength = 300; inp.className = 'escribe nota-inp';
+      inp.value = f.nota; inp.dataset.nota = f.code; inp.placeholder = 'Escribe una nota';
+      td.appendChild(inp); tr.appendChild(td);
+      tn.appendChild(tr);
+    }
+  }
+  function iniciarFacturas() {
+    const form = q('#form-factura');
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const input = form.caja;
+      accion(async () => {
+        const r = await S.engine.registrarFactura({ caja: input.value });
+        if (r.previa) toast(r.caja + ' ya estaba en el índice (registrada por ' + (r.previa.operator || '?') + '). Se agregó otra fila.', 'ok');
+        else toast(r.caja + ' agregada.', 'ok');
+        input.value = '';
+      }).then(() => input.focus());
+    };
+    q('#buscar-facturas').addEventListener('input', renderFacturas);
+    q('#buscar-notas').addEventListener('input', renderFacturas);
+    q('#tabla-facturas').addEventListener('click', (e) => {
+      const b = e.target.closest('[data-quitar]');
+      if (!b) return;
+      accion(() => S.engine.quitarFactura({ code: b.dataset.quitar }));
+    });
+    const tn = q('#tabla-notas');
+    tn.addEventListener('keydown', (e) => { if (e.target.matches('.nota-inp') && e.key === 'Enter') { e.preventDefault(); e.target.blur(); } });
+    tn.addEventListener('change', (e) => {
+      if (!e.target.matches('.nota-inp')) return;
+      accion(() => S.engine.actualizarNota({ code: e.target.dataset.nota, nota: e.target.value }));
+    });
+    q('#btn-limpiar-notas').onclick = () => {
+      const codes = S.engine.listFacturas({ q: q('#buscar-notas').value }).map((f) => f.code);
+      accion(async () => {
+        const r = await S.engine.limpiarNotas({ codes });
+        toast(r.limpiadas === 1 ? '1 nota limpiada.' : r.limpiadas > 1 ? r.limpiadas + ' notas limpiadas.' : 'No había notas que limpiar en la lista.', 'ok');
+      });
+    };
+  }
+
   async function refrescar() {
     if (!S.engine || !S.session) return;
     S.cfg = S.engine.config;
@@ -315,6 +391,7 @@
     renderResumen(snap);
     renderPiso(snap);
     renderDetalle(snap);
+    renderFacturas();
     renderReportes();
     renderTurno();
     await renderConfig();
@@ -669,6 +746,7 @@
     };
   }
   iniciarCaptura(q('#form-recoleccion'));
+  iniciarFacturas();
 
   // Registro de una caja en una bahía, con unidad, estatus inicial y fecha de descarga.
   const RESPONSABLE = (etapa) => (etapa === 'Por ubicar' ? 'Putaway' : 'Recibo');

@@ -357,3 +357,16 @@ body.tema-blanco .btn-tema { background: #ffffff; }
   .menu .pie button { padding: 6px 0; }
 }
 .menu .ico { display: inline-block; min-width: 1.4em; text-align: center; }
+
+/* v0.6.0: facturas y notas (índice general) */
+.facturas-bloque { margin-top: 14px; align-items: start; }
+.factura-agregar { display: flex; gap: 8px; margin-bottom: 8px; }
+.factura-agregar input { flex: 1; }
+.buscador { width: 100%; margin-bottom: 6px; }
+.fila-notas-top { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; }
+.fila-notas-top .buscador { margin-bottom: 0; flex: 1; }
+.tabla-facturas-wrap { max-height: 320px; overflow-y: auto; border: 1px solid var(--borde); border-radius: 8px; }
+.tabla-facturas { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabla-facturas th { position: sticky; top: 0; background: var(--panel2); text-align: left; padding: 6px 8px; font-size: 11px; color: var(--suave); }
+.tabla-facturas td { padding: 5px 8px; border-top: 1px solid var(--borde); }
+.tabla-facturas .nota-inp { width: 100%; padding: 4px 6px; font-size: 13px; }

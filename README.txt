@@ -1,4 +1,4 @@
-QORVEX RECIBO · v0.5.2
+QORVEX RECIBO · v0.6.0
 =====================================================================
 
 Control de recibo sin servidor. Un solo equipo, historial en archivos
@@ -141,8 +141,8 @@ CARPETAS EXISTENTES (creadas con v0.3.x o v0.4.x)
 
 PRUEBAS AUTOMÁTICAS
   npm install
-  npm test                 (reglas del motor: 43 pruebas)
-  npm run test:e2e         (interfaz en Chrome real: 60 pruebas)
+  npm test                 (reglas del motor: 45 pruebas)
+  npm run test:e2e         (interfaz en Chrome real: 64 pruebas)
 
 Para la prueba de interfaz, Chrome debe estar instalado. Si no está en la
 ruta por defecto, indícala así en Windows (PowerShell):
@@ -177,7 +177,7 @@ PRUEBA MANUAL OBLIGATORIA (una vez, en el equipo real)
     carpeta desde un servidor local de escritorio, lo que cambia un poco el plan.
 
 
-LIMITACIONES CONOCIDAS (v0.5.2)
+LIMITACIONES CONOCIDAS (v0.6.0)
 - La contraseña es una barrera local. Quien tenga acceso a la carpeta puede
   leer el historial. Si se necesita cifrado, se agrega después.
 - Un solo equipo. Dos equipos con la misma carpeta de red no están soportados.
@@ -225,6 +225,17 @@ DECISIONES TOMADAS EN ESTA VERSIÓN (confirmar o cambiar)
   (el administrador puede cambiar perfiles o agregar usuarios). Si quieres que el
   administrador apruebe cada alta, se cambia.
 - Tema: azul por defecto; el botón cambia a blanco para todo el programa.
+
+
+CAMBIOS DE v0.6.0
+- Captura: nuevos apartados Facturas y Notas debajo de la tarjeta de recolección
+  (la tarjeta no cambió).
+- Facturas: índice general compartido por todos los usuarios. Enter en el campo
+  Agregar registra la factura y el cursor queda listo para la siguiente.
+  Si la factura ya existe, avisa quién la registró y agrega otra fila.
+  La X quita la fila de la lista; el evento queda en el historial.
+- Notas: un comentario por factura, con su propio buscador. El botón Limpiar
+  notas borra solo el texto de las notas visibles; las facturas se conservan.
 
 
 CAMBIOS DE v0.5.2
